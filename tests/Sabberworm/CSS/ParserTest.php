@@ -716,22 +716,28 @@ body {background-url: url("http://somesite.com/images/someimage.gif");}';
 	}
 
 	function testFlatCommentExtracting() {
-		$parser = new Parser('div {/*Find Me!*/left:10px; text-align:left;}');
+		$parser = new Parser('div {/*Find Me!*/left:10px; /*Find Me Too!*/text-align:left;}');
 		$doc = $parser->parse();
 		$contents = $doc->getContents();
 		$divRules = $contents[0]->getRules();
-		$comments = $divRules[0]->getComments();
-		$this->assertCount(1, $comments);
-		$this->assertEquals("Find Me!", $comments[0]->getComment());
+		$rule1Comments = $divRules[0]->getComments();
+		$rule2Comments = $divRules[1]->getComments();
+		$this->assertCount(1, $rule1Comments);
+		$this->assertCount(1, $rule2Comments);
+		$this->assertEquals("Find Me!", $rule1Comments[0]->getComment());
+		$this->assertEquals("Find Me Too!", $rule2Comments[0]->getComment());
 	}
 
 	function testTopLevelCommentExtracting() {
-		$parser = new Parser('/*Find Me!*/div {left:10px; text-align:left;}');
+		$parser = new Parser('/*Find Me!*/div {left:10px; text-align:left;} /*Find Me Too!*/a {left:10px;}');
 		$doc = $parser->parse();
 		$contents = $doc->getContents();
-		$comments = $contents[0]->getComments();
-		$this->assertCount(1, $comments);
-		$this->assertEquals("Find Me!", $comments[0]->getComment());
+		$list1Comments = $contents[0]->getComments();
+		$list2Comments = $contents[1]->getComments();
+		$this->assertCount(1, $list1Comments);
+		$this->assertCount(1, $list2Comments);
+		$this->assertEquals("Find Me!", $list1Comments[0]->getComment());
+		$this->assertEquals("Find Me Too!", $list2Comments[0]->getComment());
 	}
 
 	/**
